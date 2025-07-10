@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "184994299334",
+    "project_id": "blood-dbfc4",
+    "storage_bucket": "blood-dbfc4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184994299334:android:97684011d74ea904de46c7",
+        "android_client_info": {
+          "package_name": "com.example.blooddonation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3HaxIV8ZYcS1jsp4IP8SgJuKVb295YpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

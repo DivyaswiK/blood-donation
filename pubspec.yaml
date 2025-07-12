@@ -16,7 +16,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.5.1 
   http: ^0.13.6
-  fluttertoast: ^8.2.4  
+  fluttertoast: ^8.2.4
+  timeago: ^3.6.0 
 
 dev_dependencies:
   flutter_test:

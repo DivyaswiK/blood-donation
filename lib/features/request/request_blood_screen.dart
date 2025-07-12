@@ -44,68 +44,67 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
   }
 
   Future<void> _submitForm() async {
-  if (!_formKey.currentState!.validate() || _bloodGroup == null || _requiredDate == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please complete all required fields')),
-    );
-    return;
-  }
-
-  final url = Uri.parse('http://localhost:3000/request');
-
-  // ✅ FLAT PAYLOAD like Thunder Client
-  final payload = {
-    'username': widget.username,
-    'bloodGroup': _bloodGroup,
-    'patientName': _patientNameController.text.trim(),
-    'hospitalName': _hospitalController.text.trim(),
-    'contactNumber': _contactController.text.trim(),
-    'dateOfRequirement': _requiredDate!.toIso8601String(),
-    'location': {
-      'state': _stateController.text.trim(),
-      'district': _districtController.text.trim(),
-      'city': _cityController.text.trim(),
-      'area': _areaController.text.trim(),
-      'pincode': _pincodeController.text.trim(),
-    }
-  };
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(payload),
-    );
-
-    if (response.statusCode == 201) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MatchedDonorsScreen(
-            bloodGroup: _bloodGroup!,
-            dateOfRequirement: _requiredDate!.toIso8601String(),
-            state: _stateController.text.trim(),
-            district: _districtController.text.trim(),
-            patientName: _districtController.text.trim(),
-            hospitalName: _districtController.text.trim(),
-            contactNumber:_districtController.text.trim(),
-            city: _cityController.text.trim(),
-          ),
-        ),
-      );
-    } else {
-      final result = jsonDecode(response.body);
+    if (!_formKey.currentState!.validate() || _bloodGroup == null || _requiredDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['error'] ?? 'Request submission failed')),
+        const SnackBar(content: Text('Please complete all required fields')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:3000/request');
+
+    final payload = {
+      'username': widget.username,
+      'bloodGroup': _bloodGroup,
+      'patientName': _patientNameController.text.trim(),
+      'hospitalName': _hospitalController.text.trim(),
+      'contactNumber': _contactController.text.trim(),
+      'dateOfRequirement': _requiredDate!.toIso8601String(),
+      'location': {
+        'state': _stateController.text.trim(),
+        'district': _districtController.text.trim(),
+        'city': _cityController.text.trim(),
+        'area': _areaController.text.trim(),
+        'pincode': _pincodeController.text.trim(),
+      }
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 201) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MatchedDonorsScreen(
+              username: widget.username,
+              bloodGroup: _bloodGroup!,
+              dateOfRequirement: _requiredDate!.toIso8601String(),
+              state: _stateController.text.trim(),
+              district: _districtController.text.trim(),
+              city: _cityController.text.trim(),
+              patientName: _patientNameController.text.trim(),
+              hospitalName: _hospitalController.text.trim(),
+              contactNumber: _contactController.text.trim(),
+            ),
+          ),
+        );
+      } else {
+        final result = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error'] ?? 'Request submission failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
   }
-}
-
 
   Widget _textField(TextEditingController controller, String label, {bool required = true}) {
     return Padding(

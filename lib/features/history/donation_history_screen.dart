@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'edit_donation_screen.dart'; // Make sure this file is created in same folder
+
 class DonationHistoryScreen extends StatefulWidget {
   final String username;
 
@@ -68,44 +70,86 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 3,
                 margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(TextSpan(
-                        text: 'Blood Group: ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        children: [TextSpan(text: donation['bloodGroup'] ?? '-')],
-                      )),
-                      const SizedBox(height: 8),
-                      Text.rich(TextSpan(
-                        text: 'Date & Time: ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        children: [TextSpan(text: formatDateTime(donation['availableDateTime'] ?? ''))],
-                      )),
-                      const SizedBox(height: 8),
-                      Text.rich(TextSpan(
-                        text: 'Location: ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextSpan(
-                            text:
-                                '${location['area'] ?? '-'}, ${location['city'] ?? '-'}, ${location['district'] ?? '-'}, ${location['state'] ?? '-'} - ${location['pincode'] ?? '-'}',
+                          Text.rich(
+                            TextSpan(
+                              text: 'Blood Group: ',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(text: donation['bloodGroup'] ?? '-'),
+                              ],
+                            ),
                           ),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              text: 'Date & Time: ',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(text: formatDateTime(donation['availableDateTime'] ?? '')),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              text: 'Location: ',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${location['area'] ?? '-'}, ${location['city'] ?? '-'}, ${location['district'] ?? '-'}, ${location['state'] ?? '-'} - ${location['pincode'] ?? '-'}',
+                                ),
+                              ],
+                            ),
+                          ),
+                          if ((location['landmark'] ?? '').toString().trim().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text.rich(
+                                TextSpan(
+                                  text: 'Landmark: ',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  children: [
+                                    TextSpan(text: location['landmark']),
+                                  ],
+                                ),
+                              ),
+                            ),
                         ],
-                      )),
-                      if ((location['landmark'] ?? '').toString().trim().isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text.rich(TextSpan(
-                            text: 'Landmark: ',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            children: [TextSpan(text: location['landmark'])],
-                          )),
-                        ),
-                    ],
-                  ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.red),
+                        tooltip: 'Edit',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditDonationScreen(
+                                username: widget.username,
+                                donation: donation,
+                                index: index,
+                              ),
+                            ),
+                          ).then((_) {
+                            setState(() {
+                              _donationHistory = fetchDonationHistory();
+                            });
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

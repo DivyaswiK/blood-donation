@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'edit_request_screen.dart'; // 👈 Make sure this file exists
 
 class MyRequestsScreen extends StatefulWidget {
   final String username;
@@ -19,13 +20,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      // ✅ Directly return the array of requests
-      if (data != null && data['requests'] != null && data['requests'] is List) {
-        return data['requests'];
-      } else {
-        return [];
-      }
+      return data['requests'] ?? [];
     } else {
       throw Exception('Failed to load requests');
     }
@@ -70,12 +65,44 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
 
               return Card(
                 margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text('${req['patientName']} (${req['bloodGroup']})'),
-                  subtitle: Text(
-                    '${loc['area'] ?? ''}, ${loc['city'] ?? ''}, ${loc['district'] ?? ''}, ${loc['state'] ?? ''}\nHospital: ${req['hospitalName']}',
-                  ),
-                  trailing: Text(formatDate(req['dateOfRequirement'] ?? '')),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: ListTile(
+                        title: Text('${req['patientName']} (${req['bloodGroup']})'),
+                        subtitle: Text(
+                          '${loc['area'] ?? ''}, ${loc['city'] ?? ''}, ${loc['district'] ?? ''}, ${loc['state'] ?? ''}\n'
+                          'Hospital: ${req['hospitalName']}',
+                        ),
+                        trailing: Text(formatDate(req['dateOfRequirement'] ?? '')),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.red),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditRequestScreen(
+                                username: widget.username,
+                                request: req,
+                                index: index,
+                              ),
+                            ),
+                          ).then((_) {
+                            // Refresh list after editing
+                            setState(() {
+                              _requests = fetchRequests();
+                            });
+                          });
+                        },
+                      ),
+                    )
+                  ],
                 ),
               );
             },

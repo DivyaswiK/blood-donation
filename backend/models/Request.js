@@ -1,22 +1,22 @@
-// const mongoose = require('mongoose');
+// // const mongoose = require('mongoose');
 
-// const requestSchema = new mongoose.Schema({
-//   username: { type: String, required: true },
-//   bloodGroup: { type: String, required: true },
-//   patientName: { type: String, required: true },
-//   hospitalName: { type: String, required: true },
-//   contactNumber: { type: String, required: true },
-//   dateOfRequirement: { type: Date, required: true },
-//   location: {
-//     state: String,
-//     district: String,
-//     city: String,
-//     area: String,
-//     pincode: String,
-//   },
-// }, { timestamps: true });
+// // const requestSchema = new mongoose.Schema({
+// //   username: { type: String, required: true },
+// //   bloodGroup: { type: String, required: true },
+// //   patientName: { type: String, required: true },
+// //   hospitalName: { type: String, required: true },
+// //   contactNumber: { type: String, required: true },
+// //   dateOfRequirement: { type: Date, required: true },
+// //   location: {
+// //     state: String,
+// //     district: String,
+// //     city: String,
+// //     area: String,
+// //     pincode: String,
+// //   },
+// // }, { timestamps: true });
 
-// module.exports = mongoose.model('Request', requestSchema);
+// // module.exports = mongoose.model('Request', requestSchema);
 const mongoose = require('mongoose');
 
 const requestSchema = new mongoose.Schema({
@@ -41,3 +41,4 @@ const requestSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('Request', requestSchema);
+

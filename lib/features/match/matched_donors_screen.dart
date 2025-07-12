@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class MatchedDonorsScreen extends StatefulWidget {
+  final String username;
   final String bloodGroup;
   final String dateOfRequirement;
   final String state;
@@ -14,6 +15,7 @@ class MatchedDonorsScreen extends StatefulWidget {
 
   const MatchedDonorsScreen({
     super.key,
+    required this.username,
     required this.bloodGroup,
     required this.dateOfRequirement,
     required this.state,
@@ -37,6 +39,7 @@ class _MatchedDonorsScreenState extends State<MatchedDonorsScreen> {
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
+        "username":widget.username,
         "bloodGroup": widget.bloodGroup,
         "dateOfRequirement": widget.dateOfRequirement,
         "patientName": widget.patientName,

@@ -10,7 +10,7 @@ const Notification = require('./models/Notification');
 const app = express();
 const PORT = 3000;
 
-const MONGO_URI = 'mongodb+srv://Divyaswi_15:Divya%402005@eep.8r1ngb7.mongodb.net/blood?retryWrites=true&w=majority&appName=EEP'; 
+const MONGO_URI = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; 
 
 app.use(cors());
 app.use(express.json());

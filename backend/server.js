@@ -7,6 +7,7 @@ const Request = require('./models/Request');
 const Notification = require('./models/Notification');
 
 
+
 const app = express();
 const PORT = 3000;
 
@@ -59,8 +60,9 @@ app.post('/login', async (req, res) => {
 app.post('/donate', async (req, res) => {
   try {
     const { username, donation } = req.body;
+
     if (
-      !username || !donation?.bloodGroup || !donation?.availableDateTime ||
+      !username || !donation?.bloodGroup || !donation?.contactNumber || !donation?.availableDateTime ||
       !donation?.location?.state || !donation?.location?.district ||
       !donation?.location?.city || !donation?.location?.area || !donation?.location?.pincode
     ) {
@@ -69,6 +71,7 @@ app.post('/donate', async (req, res) => {
 
     const donationEntry = {
       bloodGroup: donation.bloodGroup,
+      contactNumber: donation.contactNumber,
       location: donation.location,
       availableDateTime: new Date(donation.availableDateTime),
       lastDonatedAt: donation.lastDonatedAt ? new Date(donation.lastDonatedAt) : undefined
@@ -328,10 +331,11 @@ app.post('/match-donors', async (req, res) => {
           if (!donation.lastDonatedAt || new Date(donation.lastDonatedAt) <= new Date(Date.now() - 90 * 86400000)) {
             score += 2;
           }
-
+          const user = await User.findOne({ username: donor.username });
           matchedDonors.push({
             username: donor.username,
             bloodGroup: donation.bloodGroup,
+            contactNumber: user?.phone ?? "N/A",
             availableDateTime: donation.availableDateTime,
             lastDonatedAt: donation.lastDonatedAt,
             location: donation.location,
@@ -548,14 +552,29 @@ app.post('/notifications/accept-request', async (req, res) => {
       return res.status(400).json({ error: 'Requester username missing in metadata' });
     }
 
+    const donorUser = await User.findOne({ username: donor });
+
+    // 🔍 DEBUG: print donorUser
+    console.log('👉 Donor User:', donorUser);
+
+    if (!donorUser || !donorUser.phone) {
+      return res.status(404).json({ error: 'Donor user or phone not found' });
+    }
+
     await Notification.create({
       username: requesterUsername,
-      message: `Your blood request has been accepted by ${donor}`,
+      message: `Your blood request has been accepted by ${donorUser.username}. Contact: ${donorUser.phone}`,
+      metadata: {
+        donorUsername: donorUser.username,
+        donorContact: donorUser.phone,
+      },
+      read: false,
+      createdAt: new Date(),
     });
 
     res.status(200).json({ message: 'Request accepted and requester notified' });
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error in accept-request:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

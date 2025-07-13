@@ -15,6 +15,7 @@ class _DonateBloodScreenState extends State<DonateBloodScreen> {
   final _formKey = GlobalKey<FormState>();
 
   String? _bloodGroup;
+  final _contactNumberController = TextEditingController();
   final _stateController = TextEditingController();
   final _districtController = TextEditingController();
   final _cityController = TextEditingController();
@@ -72,6 +73,7 @@ class _DonateBloodScreenState extends State<DonateBloodScreen> {
           'username': widget.username,
           'donation': {
             'bloodGroup': _bloodGroup,
+            'contactNumber': _contactNumberController.text.trim(),
             'location': {
               'state': _stateController.text.trim(),
               'district': _districtController.text.trim(),
@@ -81,7 +83,6 @@ class _DonateBloodScreenState extends State<DonateBloodScreen> {
               'landmark': _landmarkController.text.trim(),
             },
             'availableDateTime': _selectedDateTime!.toIso8601String(),
-            // Optional: 'lastDonatedAt': DateTime.now().toIso8601String()
           }
         }),
       );
@@ -149,6 +150,7 @@ class _DonateBloodScreenState extends State<DonateBloodScreen> {
                 validator: (value) => value == null ? 'Select blood group' : null,
               ),
               const SizedBox(height: 20),
+              _buildTextField(_contactNumberController, 'Contact Number'),
               _buildTextField(_stateController, 'State'),
               _buildTextField(_districtController, 'District'),
               _buildTextField(_cityController, 'City'),
@@ -186,6 +188,9 @@ class _DonateBloodScreenState extends State<DonateBloodScreen> {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
         controller: controller,
+        keyboardType: label == 'Contact Number' || label == 'Pincode'
+            ? TextInputType.phone
+            : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),

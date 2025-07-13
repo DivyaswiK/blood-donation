@@ -5,6 +5,7 @@ const donationSchema = new mongoose.Schema({
   donations: [
     {
       bloodGroup: { type: String, required: true },
+      contactNumber: { type: String, required: true },
       location: {
         state: { type: String, required: true },
         district: { type: String, required: true },

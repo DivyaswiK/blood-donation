@@ -93,8 +93,9 @@ class _MatchedDonorsScreenState extends State<MatchedDonorsScreen> {
                 child: ListTile(
                   title: Text("🩸 ${donor['bloodGroup']} - ${donor['username']}"),
                   subtitle: Text(
-                    '${loc['area']}, ${loc['city']}, ${loc['district']}, ${loc['state']}',
-                  ),
+  '${loc['area']}, ${loc['city']}, ${loc['district']}, ${loc['state']}\n📞 Contact: ${donor['contactNumber'] ?? 'N/A'}',
+),
+
                   trailing: Text(
                     donor['availableDateTime'].toString().substring(0, 10),
                     style: const TextStyle(fontWeight: FontWeight.bold),

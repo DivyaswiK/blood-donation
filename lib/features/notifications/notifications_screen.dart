@@ -90,6 +90,13 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late Future<List<dynamic>> _notifications;
 
+  @override
+  void initState() {
+    super.initState();
+    _notifications = fetchNotifications();
+    markAllAsRead();
+  }
+
   Future<List<dynamic>> fetchNotifications() async {
     final url = Uri.parse('http://localhost:3000/notifications?username=${widget.username}');
     final response = await http.get(url);
@@ -122,10 +129,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         title: const Text("Delete Notification"),
         content: const Text("Are you sure you want to delete this notification?"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
@@ -139,7 +143,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> markAllAsRead() async {
-    final url = Uri.parse('http://localhost:3000/notifications/mark-read?username=${widget.username}');
+    final url = Uri.parse(
+        'http://localhost:3000/notifications/mark-read?username=${widget.username}');
     await http.post(url);
   }
 
@@ -166,11 +171,50 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _notifications = fetchNotifications();
-    markAllAsRead();
+  Widget _buildNotificationTile(Map<String, dynamic> note, bool showAcceptButton) {
+    final createdAt = DateTime.tryParse(note['createdAt']) ?? DateTime.now();
+
+    return Dismissible(
+      key: Key(note['_id']),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) => confirmDelete(context, note['_id']),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(note['message'], style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 6),
+              Text(timeago.format(createdAt),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              if (showAcceptButton)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ElevatedButton.icon(
+                    onPressed: () => acceptRequest(note),
+                    icon: const Icon(Icons.check_circle),
+                    label: const Text("Accept"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[600],
+                      foregroundColor: Colors.white,
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                  ),
+                )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -189,58 +233,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           }
 
           final notifications = snapshot.data!;
-          return ListView.builder(
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              final note = notifications[index];
-              final createdAt = DateTime.tryParse(note['createdAt']) ?? DateTime.now();
-              final bool isRequestNotification = note['message'].toString().contains("Blood Needed");
+          final requestsReceived = notifications
+              .where((note) => note['message'].toString().contains("Blood Needed"))
+              .toList();
+          final requestsAccepted = notifications
+              .where((note) => note['message'].toString().contains("accepted by"))
+              .toList();
 
-              return Dismissible(
-                key: Key(note['_id']),
-                direction: DismissDirection.endToStart,
-                confirmDismiss: (_) => confirmDelete(context, note['_id']),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                child: Card(
-                  margin: const EdgeInsets.all(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          note['message'],
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          timeago.format(createdAt),
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        ),
-                        if (isRequestNotification) ...[
-                          const SizedBox(height: 10),
-                          ElevatedButton.icon(
-                            onPressed: () => acceptRequest(note),
-                            icon: const Icon(Icons.check_circle),
-                            label: const Text("Accept Request"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green[600],
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            ),
-                          ),
-                        ]
-                      ],
-                    ),
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (requestsReceived.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(12, 16, 12, 8),
+                    child: Text("🩸 Requests Received",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                ),
-              );
-            },
+                  ...requestsReceived
+                      .map((note) => _buildNotificationTile(note, true))
+                      .toList(),
+                ],
+                if (requestsAccepted.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(12, 24, 12, 8),
+                    child: Text("✅ Requests Accepted",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  ...requestsAccepted
+                      .map((note) => _buildNotificationTile(note, false))
+                      .toList(),
+                ],
+              ],
+            ),
           );
         },
       ),
